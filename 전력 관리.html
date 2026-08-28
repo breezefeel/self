@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전력 관리 | REAL MOVEMENT</title>
+<meta name="theme-color" content="#F6E4C4">
+<link rel="icon" href="리얼무브먼트_링크_로고.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+  --bg: #F6E4C4;
+  --paper: #fffdf8;
+  --ink: #0B2048;
+  --mute: #5c6b86;
+  --line: #e6d7bc;
+  --accent: #dc143c;
+  --navy: #1e3a6e;
+  --on: #0d8a5b;
+  --on-bg: #e5f7ee;
+  --off: #7b8494;
+  --off-bg: #eef1f5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+body { padding: calc(16px + env(safe-area-inset-top)) 16px calc(36px + env(safe-area-inset-bottom)); }
+.wrap { width: 100%; max-width: 1100px; margin: 0 auto; }
+.head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.brand { font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--accent); }
+h1 { font-size: 24px; font-weight: 800; letter-spacing: -.04em; margin: 4px 0 4px; }
+.now { font-size: 13px; color: var(--mute); }
+.head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hej-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy);
+  background: #fff; font-weight: 800; font-size: 13px;
+  padding: 9px 14px; border-radius: 999px;
+}
+.refresh {
+  border: 0; background: var(--navy); color: #fff;
+  font: inherit; font-weight: 800; font-size: 13px;
+  padding: 10px 14px; border-radius: 999px; cursor: pointer;
+}
+.err {
+  background: #fff; border: 1px solid #f0c9c9; color: #8a1f1f;
+  border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 16px; white-space: pre-wrap;
+}
+.err[hidden] { display: none !important; }
+.place { margin-bottom: 8px; }
+.place-hd {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin-bottom: 10px;
+}
+.place-hd h2 { font-size: 18px; font-weight: 800; letter-spacing: -.03em; }
+.place-hd .meta { font-size: 12px; color: var(--mute); font-weight: 700; }
+.hr {
+  border: 0; height: 1px; background: var(--navy); opacity: .22;
+  margin: 22px 0 18px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 920px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+}
+.card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 14px 14px 12px; min-width: 0;
+}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.name { font-size: 15px; font-weight: 800; letter-spacing: -.03em; word-break: keep-all; }
+.meta { font-size: 12px; color: var(--mute); margin-top: 3px; }
+.badge {
+  flex: 0 0 auto; border-radius: 999px; padding: 4px 9px;
+  font-size: 11px; font-weight: 800;
+}
+.badge.on { background: var(--on-bg); color: var(--on); }
+.badge.off { background: var(--off-bg); color: var(--off); }
+.badge.wait { background: #fff4d6; color: #9a6b12; }
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 12px;
+}
+.switch {
+  position: relative; width: 52px; height: 30px; border: 0; border-radius: 999px;
+  background: #cfd5de; cursor: pointer; flex: 0 0 auto;
+}
+.switch[aria-checked="true"] { background: var(--on); }
+.switch:disabled { opacity: .4; cursor: not-allowed; }
+.switch i {
+  position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+  background: #fff; border-radius: 50%; transition: transform .18s;
+}
+.switch[aria-checked="true"] i { transform: translateX(22px); }
+.times {
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-top: 10px; align-items: end;
+}
+.times label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 11px; font-weight: 800; color: var(--mute);
+}
+.times input, .card select {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 8px; font: inherit; color: var(--ink); background: #fff;
+}
+.save {
+  border: 0; background: var(--navy); color: #fff; font: inherit; font-weight: 800;
+  font-size: 12px; padding: 9px 10px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+}
+.save:disabled { opacity: .45; }
+.empty {
+  grid-column: 1 / -1; background: var(--paper); border: 1px dashed var(--line);
+  border-radius: 14px; padding: 16px; color: var(--mute); font-size: 13px;
+}
+.move { margin-top: 10px; }
+.move select { font-size: 12px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="brand">REAL MOVEMENT</div>
+      <h1>전력 관리</h1>
+      <p class="now" id="now">불러오는 중</p>
+    </div>
+    <div class="head-actions">
+      <a class="hej-link" id="hej-link" href="https://play.google.com/store/apps/details?id=com.goqual" target="_blank" rel="noopener">헤이홈 앱</a>
+      <button type="button" class="refresh" id="refresh">다시 불러오기</button>
+    </div>
+  </div>
+  <div class="err" id="err" hidden></div>
+  <div id="app"></div>
+</div>
+<script>
+var API = (function () {
+  if (location.protocol === "file:") return "http://127.0.0.1:8788";
+  if (location.port === "8788") return "";
+  return "http://127.0.0.1:8788";
+})();
+var PLACES = [
+  { id: "incheon", name: "인천" },
+  { id: "yaksu", name: "약수" },
+  { id: "home", name: "집" }
+];
+var MOVE = PLACES.concat([{ id: "unassigned", name: "미배정" }]);
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+}
+function badge(on) {
+  if (on === true) return '<span class="badge on">켜짐</span>';
+  if (on === false) return '<span class="badge off">꺼짐</span>';
+  return '<span class="badge wait">확인 불가</span>';
+}
+function meta(d) {
+  var bits = [d.typeLabel];
+  if (d.currentTemp != null) bits.push("현재 " + d.currentTemp + "°");
+  if (d.targetTemp != null) bits.push("설정 " + d.targetTemp + "°");
+  if (d.humidity != null) bits.push("습도 " + d.humidity + "%");
+  if (d.error) bits.push("상태 조회 안 됨");
+  return bits.join(" · ");
+}
+function card(d) {
+  var can = d.controllable && d.on !== null;
+  var opts = MOVE.map(function (p) {
+    return '<option value="' + p.id + '"' + (d.location === p.id ? " selected" : "") + ">" + p.name + "</option>";
+  }).join("");
+  return '<article class="card">' +
+    '<div class="card-top"><div><div class="name">' + esc(d.name) + "</div>" +
+    '<div class="meta">' + esc(meta(d)) + "</div></div>" + badge(d.on) + "</div>" +
+    '<div class="row"><span class="meta">' + (can ? "전원" : "원격 제어 불가") + "</span>" +
+    '<button type="button" class="switch" role="switch" aria-checked="' + (d.on === true) + '"' +
+      (can ? "" : " disabled") + ' data-power="' + esc(d.id) + '" data-type="' + esc(d.type) + '"' +
+      ' data-next="' + (d.on !== true) + '"><i></i></button></div>' +
+    '<form class="times" data-device="' + esc(d.id) + '">' +
+      '<label>자동 켜짐<input type="time" name="on" value="' + esc(d.autoOn || "") + '"></label>' +
+      '<label>자동 꺼짐<input type="time" name="off" value="' + esc(d.autoOff || "") + '"></label>' +
+      '<button type="submit" class="save">저장</button></form>' +
+    '<div class="move"><select data-assign="' + esc(d.id) + '">' + opts + "</select></div>" +
+  "</article>";
+}
+function section(place, group) {
+  var devices = (group && group.devices) || [];
+  var body = devices.length
+    ? devices.map(card).join("")
+    : '<p class="empty">이 지점에 나눈 기기가 없습니다. 카드 아래 목록에서 옮겨 주세요.</p>';
+  var count = group ? (group.onCount + " / " + group.total) : "0 / 0";
+  return '<section class="place" data-place="' + place.id + '">' +
+    '<div class="place-hd"><h2>' + place.name + '</h2><span class="meta">켜진 기기 ' + count + "</span></div>" +
+    '<div class="grid">' + body + "</div></section>";
+}
+function render(data) {
+  var map = {};
+  (data.groups || []).forEach(function (g) { map[g.id] = g; });
+  var html = "";
+  PLACES.forEach(function (place, i) {
+    if (i) html += '<hr class="hr">';
+    html += section(place, map[place.id]);
+  });
+  var extra = map.unassigned;
+  if (extra && extra.devices && extra.devices.length) {
+    html += '<hr class="hr">' + section({ id: "unassigned", name: "미배정" }, extra);
+  }
+  $("app").innerHTML = html;
+  $("now").textContent = (data.now || "") + " 기준";
+}
+function showErr(msg) {
+  $("err").hidden = !msg;
+  $("err").textContent = msg || "";
+}
+async function api(path, options) {
+  var res = await fetch(API + path, Object.assign({
+    headers: { "Content-Type": "application/json" }
+  }, options || {}));
+  var payload = await res.json().catch(function () { return {}; });
+  if (!res.ok) throw new Error(payload.detail || "요청에 실패했습니다.");
+  return payload;
+}
+async function load() {
+  showErr("");
+  $("now").textContent = "불러오는 중";
+  try {
+    render(await api("/api/overview"));
+  } catch (e) {
+    render({ groups: [], now: "" });
+    $("now").textContent = "연결 안 됨";
+    showErr("기기를 불러오지 못했습니다.\n아래 「전력서버켜기」를 실행한 뒤, 이 페이지에서 다시 불러오세요.\n\n" + (e.message || e));
+  }
+}
+$("hej-link").addEventListener("click", function (e) {
+  var ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    e.preventDefault();
+    location.href = "https://apps.apple.com/app/id1435783535";
+  } else if (/Android/i.test(ua)) {
+    e.preventDefault();
+    location.href = "intent://#Intent;package=com.goqual;scheme=https;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.goqual;end";
+  }
+});
+$("refresh").addEventListener("click", load);
+document.addEventListener("click", async function (e) {
+  var btn = e.target.closest("[data-power]");
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  try {
+    await api("/api/power/" + btn.getAttribute("data-power"), {
+      method: "POST",
+      body: JSON.stringify({
+        on: btn.getAttribute("data-next") === "true",
+        type: btn.getAttribute("data-type")
+      })
+    });
+    await load();
+  } catch (err) {
+    showErr(err.message);
+    btn.disabled = false;
+  }
+});
+document.addEventListener("change", async function (e) {
+  var sel = e.target.closest("[data-assign]");
+  if (!sel) return;
+  try {
+    await api("/api/location", {
+      method: "POST",
+      body: JSON.stringify({ deviceId: sel.getAttribute("data-assign"), location: sel.value })
+    });
+    await load();
+  } catch (err) {
+    showErr(err.message);
+  }
+});
+document.addEventListener("submit", async function (e) {
+  var form = e.target.closest("form.times");
+  if (!form) return;
+  e.preventDefault();
+  var fd = new FormData(form);
+  var btn = form.querySelector(".save");
+  if (btn) btn.disabled = true;
+  try {
+    var result = await api("/api/schedule", {
+      method: "POST",
+      body: JSON.stringify({
+        deviceId: form.getAttribute("data-device"),
+        on: fd.get("on") || "",
+        off: fd.get("off") || "",
+        applyToThinq: true
+      })
+    });
+    if (result.thinqErrors && result.thinqErrors.length) {
+      showErr("시간은 저장했습니다. ThinQ 반영 실패: " + result.thinqErrors[0]);
+    }
+    await load();
+  } catch (err) {
+    showErr(err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+});
+load();
+</script>
+</body>
+</html>
